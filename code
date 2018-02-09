@@ -1,3 +1,65 @@
+#Read data
+txttest<-read.table("winetxt.txt",header=TRUE, sep ="\t") #read tab sep file
+XX<- read.table(file.choose()) #choose file if not in directory
+
+setwd("C:/Users/scott.edwards/Desktop/Epsilon_Active_Inactive_lists")
+master <- read.csv(file.choose(), header = TRUE)
+master_na_rm <- na.omit(master)
+
+#data cleaning
+satserv[satserv > 5] <- 5 #replace all items in a vector over 5 with 5
+satserv[satserv < 1] <- 1
+reop_full$SALES <- as.numeric(levels(reop_full$SALES))[reop_full$SALES] #change factor to numeric
+
+#dataConnect
+
+install.packages("odbc")
+install.packages("DBI")
+library(odbc)
+library(DBI)
+con <- dbConnect(odbc::odbc(), "WFMPROD2", UID = "SCOTT.EDWARDS", PWD = "g0D@WGS#5589")
+dbListTables(con, schema = "edw_r")
+
+#Chi Sq Test
+library(mass)
+chitbl <- table(master$Advantage.Individual.Marital.Status...Person.1 , master$Core_Flag)
+chitbl
+chitbl <- table(master$Advantage.Individual.Marital.Status...Person.1 , master$Core_Flag)
+chisq.test(chitbl)
+#Subset dataframe
+test <- master_na_rm[master_na_rm$Advantage.Individual.Marital.Status...Person.1 %in% 'MARRIED' | master_na_rm$Advantage.Individual.Marital.Status...Person.1 %in% 'SINGLE',]
+chitbl2 <- table( test$Advantage.Individual.Marital.Status...Person.1, test$Core_Flag)
+chitbl2
+
+#common functions
+#DO NOT do for (i in 1:length(x) print(i)). Very suceptible to bugs! instead use i in seq_along(x)
+FUNCTIONNAME <- function(input/inputs) { Expression } #standard function format
+se <- function(x) { sd(x)/sqrt(length(x)) }
+se(object) #object/vector plugged in
+#best pactice using se fx:
+seT <- function(x) {
+  tmp.sd <- sd(x) #create temp variables
+  tmp.N <- length(x)
+  tmp.se <- tmp.sd / sqrt(tmp.N)
+  return(tmp.se)
+}
+seT(object)
+
+if(condition) {
+  statements
+} else if (condition2) {
+  statemnets
+} else {
+  statements}
+
+
+}
+}
+
+#common stats calcs
+mean(object) + tscore * se(object)  #upper bound of CI using the se fx written above
+cor.test(df$x,df$Y) #significance of correlation at 95% CI
+
 #connect to DB
 install.packages("odbc")
 install.packages("DBI")
