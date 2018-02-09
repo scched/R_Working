@@ -1,2 +1,2 @@
 # R_Working
-Code snippets for commun functions
+Code snippets for common functions
