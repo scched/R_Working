@@ -1,0 +1,168 @@
+#connect to DB
+install.packages("odbc")
+install.packages("DBI")
+library(odbc)
+library(DBI)
+con <- dbConnect(odbc::odbc(), "DB_NAME", UID = "UN", PWD = "PW")
+dbListTables(con, schema = "SCHEMA_NAME")
+
+#plotting
+hist(df$column,
+     main = "title",
+     xlab = "x axis tilte",
+     ylab = "y axis title",
+     breaks = (n), #number of bars we want
+     col = "color",
+     freq = FALSE, #makes it density not counts
+     
+     )
+axis(side=1, at=seq(60,300, by=20)) #adjust x axis. To adjust Y you would use side = 2
+lines(density(store.df$p1sales, bw = 10),  #bw is the amount of smoothing
+       type = "l", col = "black", lwd = 3)  #type is an L not a 1. lwd is line width
+
+boxplot(store.df$p2sales, xlab = "Weekly Sales", ylab = "P2",
+        main = "Weekly Sales of Product 2, All Stores", horizontal = TRUE) #horizontal rotates the plot
+boxplot(store.df$p2sales ~ store.df$storenum, horizontal = TRUE,  #Mutiple plots horizontal
+        ylab = "Store", xlab = "Weekly Unit Sales", las = 1, #forces the axis to have labels horizonal
+        main = "Weekly Sales of Product 2 by Store"
+
+qqnorm(store.df$p1sales) #QQ plot for normality
+qqnorm(log(store.df$p1sales)) #smoothing
+
+plot(ecdf(store.df$p1sales),  #Cumulative distribution plot
+     main = "Cumulative distribution of P1 Weekly Sales",
+     ylab = "Cumulative Proportion",
+     xlab = c("P1 Weekly Sales All Stores", "90% of Weeks sold <= 175 Units"),
+     yaxt="n")
+abline(v=quantile(store.df$p1sales, pr = 0.9), lty = 3) #put a vertical dotted line at probability .9. lty = 3 is the dotted line
+abline(h=0.9,lty = 3) #put a horizonal line at probablity 0.9
+
+plot(x,y) #gives basic scatterplot
+plot(custdf$age, custdf$creditscore,  #can add in cex=0.X to change point size
+     col="blue",
+     xlim = c(15,55), ylim = c(500,900),
+     main = "Active Customers - June 2014",
+     xlab = "Customer Age (Years)", ylab = "Customer Credit Score")
+abline(h=mean(custdf$creditscore), col = "dark blue", lty = "dotted")
+abline(v=mean(custdf$age),col="dark blue", lty = "dotted")
+
+par(mfrow = c(2,2))  #plot the next 4 plots on the same panel
+plot(custdf$distance,custdf$sspend, main = "Store")
+plot(custdf$distance,custdf$ospend, main = "Online")
+plot(custdf$distance,custdf$sspend+1, log="xy", main = "Log of Store")
+plot(custdf$distance,custdf$ospend+1, log="xy", main = "Log of Online") 
+par(mfrow = c(1,1)) #returns you to single plot
+
+pairs(formula = ~ age + creditscore + email + distance +    #plot correlation matrix for all variables listed and their interaction
+      visits + otrans +ospend + strans + sspend,
+      data = custdf)
+Library(car) #CAR stands for Companion to Applied Regression
+scatterpotMatrix()
+scatterplotMatrix(formula = ~age + creditscore + email + distance +    #more robust option to the pairs() fx
+                  visits + otrans +ospend + strans + sspend,
+                  data = custdf, diagonal = "histogram")  #green lines show linear fit, red lines show smoothed fit lines and their confidence intervals
+  
+library(corrplot)
+library(gplots)
+corrplot.mixed(corr=cor(custdf[,c(2,3,5:12)], use="complete.obs"),      #excludes NA values  
+                 upper="ellipse",tl.pos="lt",                           #upper triangle displayes ellipses. tl.pos = "left/top" for labels
+                 col=colorpanel(50,"red","gray60","blue4"))             #colorpanel defines the scale i.e. red for negative blue for positive
+
+jitter()  #quick plots for survey responses or other ordinal response variables. breaks out points
+plot(jitter(custdf$satserv),jitter(custdf$satselect),
+     xlab = "Satisfaction with Service",
+     ylab = "Satisfaction with Selection",
+     main = "Customers - June 2014")
+#remember, can us polychoric() as substitute for R corr when looking at ordinal responses
+
+library(vioplot)
+x1 <- reop_full$SALES[reop_full$Region=="PN"]
+x2 <- reop_full$SALES[reop_full$Region=="SO"]
+x3 <- reop_full$SALES[reop_full$Region=="RM"]
+x4 <- reop_full$SALES[reop_full$Region=="SW"]
+vioplot(x1,x2,x3,x4,names=c("PN","SO","RM","SW"), col = "light blue")
+#Gives us violin plots that incorporate distribution and frequency
+
+#Pivots/aggregates
+by(store.df$p1sales,list(store.df$storenum,store.df$year), mean) #mean of p1 sales by store and year. Output is ugly
+aggregate(store.df$p1sales, by = list(country = store.df$country), sum) #sum of p1 sales by country. Can be saved as a df
+mean(df vector[df$segment == "x"]) #mean of vectore where segment equals/in x
+mean(df vector[df$segment == "x" & df$other == "y"]) #mean of vectore where segment equals/in x and other variable is qualified by "y"
+by(seg.df$income, seg.df$segment, mean) #means of all incomes BY segment
+by(seg.df$income, list(seg.df$segment, seg.df$subscribe), mean) #same as above but by segment AND subsriber status
+# advantage of using aggregate is it's a dataframe!
+aggregate(seg.df$income ~ seg.df$segment + seg.df$subscribe, data = seg.df, mean) #Can also write it as a function
+
+#mapping
+#need packages rworldmap & RColorBrewer
+p1salesmap <- joinCountryData2Map(aggsales,joinCode = "ISO2", #ISO2 is what we joined on, in this case "Country Code"
+               nameJoinColumn = "country") #define which column from object to join to ISO
+
+#google analytics API
+token <- Auth(client.id,client.secret)
+save(token,file="./token_file") # Save the token object for future sessions into working directory (check it with getwd())
+                                #In future sessions it can be loaded by running load("./token_file")
+
+ValidateToken(token)
+query.list <- Init(start.date = "2013-11-28",                        # Build a list of all the Query Parameters
+                   end.date = "2013-12-04",
+                   dimensions = "ga:date,ga:pagePath,ga:hour,ga:medium",
+                   metrics = "ga:sessions,ga:pageviews",
+                   max.results = 10000,
+                   sort = "-ga:date",
+                   table.id = "ga:197332")  #can be found in account settings as "View ID"
+
+ga.query <- QueryBuilder(query.list) # Create the Query Builder object so that the query parameters are validated
+ga.data <- GetReportData(ga.query, token, split_daywise = T, delay = 5) # Extract the data and store it in a data-frame
+
+#building color coding vectors to code by email response
+my.col <- c("black","red") #can use colors() to view options
+my.pch <- c(1,19)  #see ?points for information
+my.col[head(custdf$email)]
+legend(x = "topright", legend = paste("Email on File:",levels(custdf$email)),
+       col=my.col,pch = my.pch)
+> plot(custdf$sspend +1, custdf$ospend +1,  #add 1 here because log(0) is undefined. With log transform, 1-10 = 10-100 for interpretation. Will allow us to see association between skewed variables
+       log= "xy", cex = 0.7,
+       col = my.col[custdf$email], pch = my.pch[custdf$email],
+       xlab = "instore",
+       ylab = "online")
+
+
+#Procedural best practice: defining data separate from procedural code for reference
+> segmeans<- matrix(c(
+  +     40,0.5,55000,2,0.5,0.1,
+  +     24,0.7,21000,1,0.2,0.2,
+  +     58,0.5,64000,0,0.7,0.05,
+  +     36,0.3,52000,2,0.3,0.2), ncol=length(segvars), byrow = TRUE)
+> 
+  > segsds<- matrix(c(
+    +     5,NA,12000,NA,NA,NA,
+    +     2,NA,5000, NA,NA,NA,
+    +     8,NA,21000,NA,NA,NA,
+    +     4,NA,10000,NA,NA,NA), ncol=length(segvars), byrow = TRUE)
+
+
+#arules -> unsupervised learning method for picking up patterns in data
+#we want the data in a sparse matrix in order to preserve computer memory
+require(arules)
+arules1 <- read.transactions(file.choose(), sep=",")
+summary(arules2)
+inspect(arules2) #this is how you actually see the data with a sparse matrix
+#Support : How frequently an item occurs in transactions (%)
+itemFrequency(arules3) #gives you a support
+itemFrequencyPlot(arules3)
+itemFrequencyPlot(arules3, support = .15) #plot supports where > 15%
+itemFrequencyPlot(arules3, topN = 3) #top 3 by support
+#confidence : the proportion of transactions where the presence of an item or set of items results in the presence of another set of items. 
+#Essentially conditional probability. If I buy item A and item B, how likely is it that I buy C. Or, given I guy A and B, how likely is it I buy C
+# conf({A,B} -> {c}) = Support({A,B,C}) / Support({A,B})
+model1 <- apriori(arules3) #uses .1 for support and .8 for confidence
+#Lift: how much more likely is item two to be purchased with item 1 relative to all transactions
+inspect(model1[1:5]) #inspect top 5 rules
+# lift: "Candy shows up in trancations 6.2 times more than in other transactions"
+
+splashcat <- read.transactions(file.choose(),sep=",")
+catmodel <- apriori(splashcat, parameter = list(support = 0.001, confidence = .001))
+inspect(head(sort(catmodel, by="lift"),20))
+inspect(head(sort(catmodel, by="confidence"),20))
+catmodelavo <- apriori(splashcat, parameter = list(support = 0.001, confidence = .001),appearance = list(lhs = c("Avocados")))
