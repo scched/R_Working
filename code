@@ -145,6 +145,11 @@ x4 <- reop_full$SALES[reop_full$Region=="SW"]
 vioplot(x1,x2,x3,x4,names=c("PN","SO","RM","SW"), col = "light blue")
 #Gives us violin plots that incorporate distribution and frequency
 
+require(lattice)
+histogram(~subscribe | segment, data = seg.df) #gives us bar charts separated by factor "Subscribe" for each segment. NOTE: the default for this is to provide proportions, NOT counts
+histogram(~subscribe | segment, data = seg.df, type = "count") #gives us count instead of default proortion
+histogram(~subscribe | segment + ownhome, data = seg.df, type = "count") #multiple factors
+
 #Pivots/aggregates
 by(store.df$p1sales,list(store.df$storenum,store.df$year), mean) #mean of p1 sales by store and year. Output is ugly
 aggregate(store.df$p1sales, by = list(country = store.df$country), sum) #sum of p1 sales by country. Can be saved as a df
@@ -154,6 +159,10 @@ by(seg.df$income, seg.df$segment, mean) #means of all incomes BY segment
 by(seg.df$income, list(seg.df$segment, seg.df$subscribe), mean) #same as above but by segment AND subsriber status
 # advantage of using aggregate is it's a dataframe!
 aggregate(seg.df$income ~ seg.df$segment + seg.df$subscribe, data = seg.df, mean) #Can also write it as a function
+with(seg.df, table(segment,ownhome)) #frequency counts in tabular form
+xtabs(kids ~ segment, data = seg.df) #Provides totals of kids by segment, NOTE: could also use aggregate with "Sum"
+prop.table(table(seg.df$subscribe, seg.df$segment), margin = 1) #gives us % of row totals for the table imbedded
+prop.table(table(seg.df$subscribe, seg.df$segment), margin = 2) #gives us % of column totals for the table imbedded
 
 #mapping
 #need packages rworldmap & RColorBrewer
