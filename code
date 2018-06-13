@@ -1,24 +1,102 @@
-#Read data
+sumu <-10
+SD<-1
+N <- 10000
+n<- 30
+pop <-rnorm(N, mean = mu, sd=SD)
+plot(density(pop))
+
+
+#Check working directory
+dir()
+setwd() #must use \\ instead of \
+setwd("C:\\Users\\scott.edwards\\Documents\\R")
+
+
+
+
+#Read data for smaller files
 txttest<-read.table("winetxt.txt",header=TRUE, sep ="\t") #read tab sep file
 XX<- read.table(file.choose()) #choose file if not in directory
 
 setwd("C:/Users/scott.edwards/Desktop/Epsilon_Active_Inactive_lists")
 master <- read.csv(file.choose(), header = TRUE)
 master_na_rm <- na.omit(master)
+#Read data for larger files
+library("data.table")
+FL_RFM <- fread("RFM_FL_6.7.18.txt")
 
-#data cleaning
+********************************************
+**************#DATA CLEANING****************
+str(data) #gives us a nice look at the "structure" of the data
 satserv[satserv > 5] <- 5 #replace all items in a vector over 5 with 5
 satserv[satserv < 1] <- 1
 reop_full$SALES <- as.numeric(levels(reop_full$SALES))[reop_full$SALES] #change factor to numeric
 
-#dataConnect
+is.na(x) #will well you logically what values are TRUE/FALSE for NA
+!is.na(x)  #opposite of the above. TRUE will be for non-NA values
+x[!is.na(x)]  #gives us all the values that ARE NOT NA
+mean(x, na.rm = TRUE) #will perform the calculations ignoring NAs
+which(is.na(df$x))
+sum(is.na(weather6)) # Count missing values
+summary(weather6) #show which variables have NAs
+ind <- which(is.na(weather6$Max.Gust.SpeedMPH)) # Find indices of NAs in Max.Gust.SpeedMPH and save to object
+weather6[ind, ] # Look at the full rows for records missing Max.Gust.SpeedMPH
 
+library(tidyr) #great for data cleaning
+library(dplyr)
+# Apply spread() to bmi_long
+***MOST IMPORTANT FUNCTIONS IN tidyr***
+bmi_wide <- spread(bmi_long,year,bmi_val) #this will spread out the bmi_values into columns by "year". 
+spread(data,columns,values)
+bmi_long <- gather(bmi,year ,bmi_val, -Country) #Brings all columns and their values after "Country" into a row called "year"
+gather(data,columns,values,columns to use)
+#Text to columns
+separate(data, col, into) #assumes you want to split on some non-character value. you can add an additional sep = "-" if you want to specify
+example: bmi_cc_clean <- separate(bmi_cc, col = Country_ISO, into = c("Country", "ISO"), sep = "/")
+unite(data, col, unquoted names of all columns to join) #default is to split them by _ by we can add sep = "-" if we want an alternate
+example: bmi_cc <- unite(bmi_cc_clean, Country_ISO, Country, ISO, sep = "-")
+arrange(dataset, column) #sort by from the dplyr package
+#Data Cleaning Strings
+str_trim() #removes leading and trailing white space
+str_pad() #adds zeros to the left or right of a string
+str_detect() #logical whether or not a string is in a vector
+      str_detect(students2$dob,"1997")
+str_replace() #replace a string with something else
+      students2$sex <- str_replace(students2$sex,"F","Female")
+tolower()
+toupper()
+#Missing & Special Values
+any(is.na(df))
+sum(is.na(df)) #will tell us how many NAs there are
+    Note that "summary" will also count this by column 
+complete.cases(df) #this can be used to only keep 
+na.omit(df) #automatically removes rows with missing values   
+df$column[df$column == ""] <- NA #replaces all blanks with NA in a column
+ind <- which(df$column == value) # Find row with Max.Humidity of 1000
+df$column[ind] <- NewValue # Change 1000 to 100
+x[!x %in% boxplot.stats(x)$out]
+
+#Removing Outliers
+
+# Convert characters to numerics
+weather6 <- mutate_each(weather5, funs(as.numeric), CloudCover:WindDirDegrees) #note: may be better to use "mutate_at"  according to documentation
+
+
+
+
+
+
+
+#dataConnect
 install.packages("odbc")
 install.packages("DBI")
 library(odbc)
 library(DBI)
-con <- dbConnect(odbc::odbc(), "WFMPROD2", UID = "SCOTT.EDWARDS", PWD = "g0D@WGS#5589")
+con <- dbConnect(odbc::odbc(), "WFM_new", UID = "SCOTT.EDWARDS", PWD = "Rosey")
 dbListTables(con, schema = "edw_r")
+
+
+
 
 #Chi Sq Test
 library(mass)
@@ -30,6 +108,10 @@ chisq.test(chitbl)
 test <- master_na_rm[master_na_rm$Advantage.Individual.Marital.Status...Person.1 %in% 'MARRIED' | master_na_rm$Advantage.Individual.Marital.Status...Person.1 %in% 'SINGLE',]
 chitbl2 <- table( test$Advantage.Individual.Marital.Status...Person.1, test$Core_Flag)
 chitbl2
+
+
+
+
 
 #common functions
 #DO NOT do for (i in 1:length(x) print(i)). Very suceptible to bugs! instead use i in seq_along(x)
@@ -56,19 +138,24 @@ if(condition) {
 }
 }
 
+
+
+
+
+
 #common stats calcs
 mean(object) + tscore * se(object)  #upper bound of CI using the se fx written above
 cor.test(df$x,df$Y) #significance of correlation at 95% CI
+quantile(DF$FIELD, prob = seq(0, 1, length = 11), type = 5, na.rm = TRUE) #deciles 
 
-#connect to DB
-install.packages("odbc")
-install.packages("DBI")
-library(odbc)
-library(DBI)
-con <- dbConnect(odbc::odbc(), "DB_NAME", UID = "UN", PWD = "PW")
-dbListTables(con, schema = "SCHEMA_NAME")
 
-#plotting
+
+
+
+
+
+********************************************
+***********#DATA VISUALIZATION**************
 hist(df$column,
      main = "title",
      xlab = "x axis tilte",
@@ -115,11 +202,19 @@ plot(custdf$distance,custdf$sspend+1, log="xy", main = "Log of Store")
 plot(custdf$distance,custdf$ospend+1, log="xy", main = "Log of Online") 
 par(mfrow = c(1,1)) #returns you to single plot
 
+plot(mtcars$wt, mtcars$mpg, col = mtcars$cyl)
+lapply(mtcars$cyl, function(x) {
+  abline(lm(mpg ~ wt, mtcars, subset = (cyl == x)), col = x)
+  })   #plots and then applies a line and color to each cyl factor
+legend(x = 5, y = 33, legend = levels(mtcars$cyl),
+       col = 1:3, pch = 1, bty = "n") #sets the legend of the above plot
+
+
 pairs(formula = ~ age + creditscore + email + distance +    #plot correlation matrix for all variables listed and their interaction
       visits + otrans +ospend + strans + sspend,
       data = custdf)
 Library(car) #CAR stands for Companion to Applied Regression
-scatterpotMatrix()
+scatterplotMatrix()
 scatterplotMatrix(formula = ~age + creditscore + email + distance +    #more robust option to the pairs() fx
                   visits + otrans +ospend + strans + sspend,
                   data = custdf, diagonal = "histogram")  #green lines show linear fit, red lines show smoothed fit lines and their confidence intervals
@@ -145,29 +240,48 @@ x4 <- reop_full$SALES[reop_full$Region=="SW"]
 vioplot(x1,x2,x3,x4,names=c("PN","SO","RM","SW"), col = "light blue")
 #Gives us violin plots that incorporate distribution and frequency
 
-require(lattice)
-histogram(~subscribe | segment, data = seg.df) #gives us bar charts separated by factor "Subscribe" for each segment. NOTE: the default for this is to provide proportions, NOT counts
-histogram(~subscribe | segment, data = seg.df, type = "count") #gives us count instead of default proortion
-histogram(~subscribe | segment + ownhome, data = seg.df, type = "count") #multiple factors
+*************#ggplot2*******************
+library(ggplot2)
+ggplot(mtcars, aes(x = factor(cyl), y = mpg)) +
+  geom_point()  # Change the command below so that cyl is treated as factor
+> ggplot(mtcars, aes(x = wt, y = mpg)) +     Standard plot
+    geom_point()
+> ggplot(mtcars, aes(x = wt, y = mpg, color = disp)) +  
+    geom_point()
+> ggplot(mtcars, aes(x = wt, y = mpg, size = disp)) +
+    geom_point()
+ggplot(diamonds, aes(x = carat, y = price, col = clarity)) +
+  geom_smooth()   #Loess lines colored by "clarity" without any points
+
+ggplot(diamonds, aes(x = carat, y = price, col = clarity)) +
+  geom_point(alpha = 0.4) #Points plotted and colored by clarity at 40% transparency
+dia_plot <- ggplot(diamonds, aes(x = carat, y = price)) #Can save a plot as an object for easier cycling 
+dia_plot + geom_smooth(aes(col = clarity), se = FALSE) #add smoothed lines to saved plot. se = false removed the shading
+
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl)) +
+  geom_point()  + 
+  geom_smooth(method = lm, se = FALSE) + 
+  geom_smooth(aes(group = 1), method = lm,se=FALSE, linetype = 2) +  #maps a different line for each cyl. I *think* you can define the factor you want to group by as well
+  facet_grid(. ~ factor)  #plot scatters in same window for each "factor"
+
+
+
 
 #Pivots/aggregates
 by(store.df$p1sales,list(store.df$storenum,store.df$year), mean) #mean of p1 sales by store and year. Output is ugly
-aggregate(store.df$p1sales, by = list(country = store.df$country), sum) #sum of p1 sales by country. Can be saved as a df
+aggregate(store.df$p1sales, by = list(country = store.df$country), sum) #sum of p1 sales grouped by country. Can be saved as a df
 mean(df vector[df$segment == "x"]) #mean of vectore where segment equals/in x
 mean(df vector[df$segment == "x" & df$other == "y"]) #mean of vectore where segment equals/in x and other variable is qualified by "y"
 by(seg.df$income, seg.df$segment, mean) #means of all incomes BY segment
 by(seg.df$income, list(seg.df$segment, seg.df$subscribe), mean) #same as above but by segment AND subsriber status
 # advantage of using aggregate is it's a dataframe!
 aggregate(seg.df$income ~ seg.df$segment + seg.df$subscribe, data = seg.df, mean) #Can also write it as a function
-with(seg.df, table(segment,ownhome)) #frequency counts in tabular form
-xtabs(kids ~ segment, data = seg.df) #Provides totals of kids by segment, NOTE: could also use aggregate with "Sum"
-prop.table(table(seg.df$subscribe, seg.df$segment), margin = 1) #gives us % of row totals for the table imbedded
-prop.table(table(seg.df$subscribe, seg.df$segment), margin = 2) #gives us % of column totals for the table imbedded
 
-#mapping
-#need packages rworldmap & RColorBrewer
-p1salesmap <- joinCountryData2Map(aggsales,joinCode = "ISO2", #ISO2 is what we joined on, in this case "Country Code"
-               nameJoinColumn = "country") #define which column from object to join to ISO
+
+
+
+
+
 
 #google analytics API
 token <- Auth(client.id,client.secret)
@@ -199,6 +313,10 @@ legend(x = "topright", legend = paste("Email on File:",levels(custdf$email)),
        ylab = "online")
 
 
+
+
+
+
 #Procedural best practice: defining data separate from procedural code for reference
 > segmeans<- matrix(c(
   +     40,0.5,55000,2,0.5,0.1,
@@ -211,6 +329,13 @@ legend(x = "topright", legend = paste("Email on File:",levels(custdf$email)),
     +     2,NA,5000, NA,NA,NA,
     +     8,NA,21000,NA,NA,NA,
     +     4,NA,10000,NA,NA,NA), ncol=length(segvars), byrow = TRUE)
+
+
+
+
+
+
+
 
 
 #arules -> unsupervised learning method for picking up patterns in data
@@ -237,3 +362,133 @@ catmodel <- apriori(splashcat, parameter = list(support = 0.001, confidence = .0
 inspect(head(sort(catmodel, by="lift"),20))
 inspect(head(sort(catmodel, by="confidence"),20))
 catmodelavo <- apriori(splashcat, parameter = list(support = 0.001, confidence = .001),appearance = list(lhs = c("Avocados")))
+
+
+
+
+
+
+
+
+#ANOVA & ANCOVA
+#1. Descriptive stats & plots
+#can do simple summary or :
+install.packages("pastecs")
+library(pastecs)
+
+by(Quant, Factor, stat.desc) #will spit out descriptive stats for variable "Quant" by "Factor"
+
+#look at assumptions. For Anova:
+#1.) Independence (based on experimental design)
+#2.) Normality
+#3.) Homogeneity of variance
+#^run levene's test. Use package car
+install.packages("car")
+library(car)
+leveneTest(Depnedent, factor,center = mean) #significance means we may NOT have homogeneity
+
+#If balanced design, Type I,II,III all produce the the same result. If unbalanced, consider the impact of each
+#Type I:
+#Type II:
+#Type III:
+
+
+
+
+
+
+
+
+
+#mapping
+#need packages rworldmap & RColorBrewer
+p1salesmap <- joinCountryData2Map(aggsales,joinCode = "ISO2", #ISO2 is what we joined on, in this case "Country Code"
+               nameJoinColumn = "country") #define which column from object to join to ISO
+
+
+
+
+
+
+
+#Dates
+%d Day (for example, 15)
+%m Months in number (for example, 08)
+%b The first three characters of a month (for example, Aug)
+%B The full name of a month (for example, August)
+%y The last two digits of a year (for example, 14)
+%Y The full year (for example, 2014)
+
+
+d <- as.date("07/Aug/12", format = "%d/%b/%y")
+ Output: [1] "2012-08-07"
+
+ format(d, %B)
+  Output: [1] "August"
+
+  library(lubridate)
+  df$column <- ymd(df$column) #would read a column with date values in a year, month, date order and convert it to a date value
+  #can use y, m, d, h, m, s
+  another example: students2$nurse_visit <- ymd_hm(students2$nurse_visit)
+
+
+
+
+
+
+
+*************#RFM#NOT CURRENTLY WORKING#*********
+*************************************************
+setwd("C:\Users\scott.edwards\Documents\R")
+FL_RFM <- fread("RFM_FL_6.7.18.txt")
+head(FL_RFM,10) #look at data first 10 rows
+dim(FL_RFM) #gives table dimensions in #Rows  #Columns
+
+install.packages("data.table")
+install.packages("lubridate")
+library(data.table)
+library(lubridate)
+
+FL_RFM$YMD <- ymd(FL_RFM$YMD) #convert date format
+head(FL_RFM,10) #check to make sure dates converted
+
+dedup <- FL_RFM[duplicated(FL_RFM[,"CID"]),] #create duplicatedd CID object
+dim(dedup) #Check rows, columns
+
+      ***#FUNCTION1***
+      ****************
+        startdate <- as.Date(min(FL_RFM$YMD))
+        enddate <- as.Date(max(FL_RFM$YMD))
+
+        getDataFrame <- function(FL_RFM,startDate,endDate,tIDColName=FL_RFM$CID,tDateColName=FL_RFM$YMD,tAmountColName=FL_RFM$AMOUNT){
+          
+          #order the dataframe by date descendingly
+          FL_RFM <- FL_RFM[order(FL_RFM[,FL_RFM$YMD],decreasing = TRUE),]
+          
+            #remove the rows with the duplicated IDs, and assign the df to a new df.
+          DD_FL_RFM <- FL_RFM[!duplicated(FL_RFM[,FL_RFM$CID]),]
+          
+          # caculate the Recency(days) to the endDate, the smaller days value means more recent
+          Recency <-as.numeric(difftime(endDate,DD_FL_RFM[,FL_RFM$YMD],units="days"))
+          
+          # add the Days column to the newdf data frame
+          DD_FL_RFM <-cbind(DD_FL_RFM,Recency)
+          
+          #order the dataframe by ID to fit the return order of table() and tapply()
+          DD_FL_RFM <- DD_FL_RFM[order(DD_FL_RFM[,FL_RFM$CID]),]
+          
+          # caculate the frequency
+          freq <- as.data.frame(table(FL_RFM[,FL_RFM$CID]))
+          Frequency <- freq[,2]
+          DD_FL_RFM <- cbind(DD_FL_RFM,Frequency)
+          
+          #caculate the Money per deal
+          mon <- as.data.frame(tapply(FL_RFM[,FL_RFM$AMOUNT],FL_RFM[,FL_RFM$CID],sum))
+          Monetary <- mon[,1]/Frequency
+          DD_FL_RFM <- cbind(DD_FL_RFM,Monetary)
+          
+          return(DD_FL_RFM)
+
+        }
+      ***#FUNCTION2***
+      ****************
