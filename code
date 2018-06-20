@@ -244,7 +244,7 @@ vioplot(x1,x2,x3,x4,names=c("PN","SO","RM","SW"), col = "light blue")
 library(ggplot2)
 ggplot(mtcars, aes(x = factor(cyl), y = mpg)) +
   geom_point()  # Change the command below so that cyl is treated as factor
-> ggplot(mtcars, aes(x = wt, y = mpg)) +     Standard plot
+> ggplot(mtcars, aes(x = wt, y = mpg)) +     #Standard plot
     geom_point()
 > ggplot(mtcars, aes(x = wt, y = mpg, color = disp)) +  
     geom_point()
@@ -264,6 +264,42 @@ ggplot(mtcars, aes(x = wt, y = mpg, col = cyl)) +
   geom_smooth(aes(group = 1), method = lm,se=FALSE, linetype = 2) +  #maps a different line for each cyl. I *think* you can define the factor you want to group by as well
   facet_grid(. ~ factor)  #plot scatters in same window for each "factor"
 
+cyl.am <- ggplot(mtcars, aes(x = factor(cyl), fill = factor(am)))
+val = c("#E41A1C", "#377EB8")
+lab = c("Manual", "Automatic")
+cyl.am +
+  geom_bar(position = "dodge") +
+  scale_x_discrete("Cylinders") + 
+  scale_y_continuous("Number") +
+  scale_fill_manual("Transmission", 
+                    values = val,
+                    labels = lab) 
+
+  #instead of y=0 below you can just use stripchart() in the base package for univariate plots
+  ggplot(mtcars, aes(x = mpg, y = 0)) +
+  geom_jitter() + scale_y_continuous(limits = c(-2,2))   #scale_y_continuous just cleans up the "fake" yaxis. Note above about stripchart()
+
+  ****HISTOGRAMS*****
+  ggplot(mtcars, aes(x = mpg)) +
+  geom_histogram(binwidth = 1, fill = "#377EB8", aes(y = ..density..))  #only requires x argument. Can set y to just be a denisty metric. Note that histograms change color with "fill"
+
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = "fill")  #makes bars out of 1, i.e. bars all go to top of graph as a "fill"
+
+
+  ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = "dodge")  #sets two factor bars side by side
+
+  #you can also define a dodge variable
+  posn_d <- position_dodge(width=0.2)
+  ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = posn_d)  #bars will be overlapping
+
+  ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = posn_d, alpha = 0.6)  #will show you the overlap via translucent bars
+
+  ggplot(mtcars, aes(mpg, col = cyl)) +
+  geom_freqpoly(binwidth = 1, position = "identity") #this gives us frequency spikes instead of bars. change the color to "col" since we're not "filling" anything anymore
 
 
 
