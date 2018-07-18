@@ -49,7 +49,7 @@ library(dplyr)
 bmi_wide <- spread(bmi_long,year,bmi_val) #this will spread out the bmi_values into columns by "year". 
 spread(data,columns,values)
 bmi_long <- gather(bmi,year ,bmi_val, -Country) #Brings all columns and their values after "Country" into a row called "year"
-gather(data,columns,values,columns to use)
+gather(data,column for headers,values,range of columns to tidy)
 #Text to columns
 separate(data, col, into) #assumes you want to split on some non-character value. you can add an additional sep = "-" if you want to specify
 example: bmi_cc_clean <- separate(bmi_cc, col = Country_ISO, into = c("Country", "ISO"), sep = "/")
@@ -132,11 +132,121 @@ if(condition) {
 } else if (condition2) {
   statemnets
 } else {
-  statements}
+  statements
+}
+
+#ex:
+medium <- "LinkedIn"
+# Control structure for medium
+if (medium == "LinkedIn") {
+  print("Showing LinkedIn information")
+} else if (medium == "Facebook") {
+  print("Showing Facebook information")
+  # Add code to print correct string when condition is TRUE
+} else {
+  print("Unknown medium")
+}
+
+#ex2:
+li <- 15
+fb <- 9
+
+# Code the control-flow construct
+if (li >= 15 & fb >= 15) {
+  sms <- 2 * (li + fb)
+} else if (li < 10 & fb < 10) {
+  sms <- 0.5 * (li + fb)
+} else {
+  sms <- li + fb
+}
+
+#WHILE LOOPING
+speed <- 64
+
+# Code the while loop
+while ( speed > 30) {
+  print("Slow down!")
+speed <- speed - 7  
+}
+
+#ADVANCING PREVIOUS LOOP
+while (speed > 30) {
+  print(paste("Your speed is",speed))
+  if ( speed > 48) {
+  print("Slow down big time!")  
+  speed <- speed - 6  
+  } else {
+  print("Slow down!")  
+  speed <- speed - 6  
+  }
+}
+
+#WOULD BREAK THE LOOP AT START
+speed <- 88
+
+while (speed > 30) {
+  print(paste("Your speed is", speed))
+  
+  # Break the while loop when speed exceeds 80
+  if ( speed > 80) {
+  break  
+  }
+  
+  if (speed > 48) {
+    print("Slow down big time!")
+    speed <- speed - 11
+  } else {
+    print("Slow down!")
+    speed <- speed - 6
+  }
+}
+
+#SEGWAY TO FOR LOOPS
+i <- 1
+
+# Code the while loop
+while (i <= 10) {
+  print(i * 3)
+  if ((3*i) %% 8 == 0) {    #if 3 times i is divisible by 8, break
+  break  
+  }
+  i <- i + 1
+}
+
+# define the double for loop for matrices
+for (i in 1:nrow(ttt)) {
+  for (j in 1:ncol(ttt)) {
+    print(paste("On row", i, "and column", j, "the board contains", ttt[i,j]))
+  }
+}
+
+# The linkedin vector has already been defined for you
+linkedin <- c(16, 9, 13, 5, 2, 17, 14)
+
+# Extend the for loop including a "break" and a "next"
+for (li in linkedin) {
+  if (li > 10) {
+    print("You're popular!")
+  } else {
+    print("Be more visible!")
+  }
+  
+  # Add if statement with break
+  if (li > 16) {
+    print("This is ridiculous, I'm outta here!")
+    break
+  }
+  
+  # Add if statement with next
+   if (li < 5) {
+    print("This is too embarrassing!")
+    next
+  }
+  
+  print(li)
+}
 
 
-}
-}
 
 
 
@@ -178,6 +288,7 @@ boxplot(store.df$p2sales ~ store.df$storenum, horizontal = TRUE,  #Mutiple plots
 qqnorm(store.df$p1sales) #QQ plot for normality
 qqnorm(log(store.df$p1sales)) #smoothing
 
+plot(density(tm_sales_NArm$Total_Sales)) #quick density
 plot(ecdf(store.df$p1sales),  #Cumulative distribution plot
      main = "Cumulative distribution of P1 Weekly Sales",
      ylab = "Cumulative Proportion",
@@ -279,7 +390,21 @@ cyl.am +
   ggplot(mtcars, aes(x = mpg, y = 0)) +
   geom_jitter() + scale_y_continuous(limits = c(-2,2))   #scale_y_continuous just cleans up the "fake" yaxis. Note above about stripchart()
 
-  ****HISTOGRAMS*****
+
+
+  #BRING IT ALL TOGETHER
+  ggplot(FUll_prime_0716,aes(x=CS_PCT_Total,y=ID_PCT_Total,col=Region, shape = Region)) #color & shape by Region
+  + geom_point(alpha = 0.4) #40% transparency
+  + scale_x_continuous("Courtesy Swipe Percent of Total Transactions")  #xaxis title
+  + scale_y_continuous("ID'd Prime % of Total Transactions (QR/PN/Phone)") #yaxis title
+  + geom_jitter() #add slight variance to prevent overlapping of points
+  + geom_hline( yintercept = median(FUll_prime_0716$ID_PCT_Total), color = "red")  #add a horizontal red line at the y median
+  + geom_vline(xintercept = median(FUll_prime_0716$CS_PCT_Total), color = "red")  #add a vertical red line at the x median
+  + ggtitle("Coutesy Swipe % of Transactions vs ID'd Prime % of Transactions")  #title
+  + scale_shape_manual(values = 1:12)  #use 12 shapes, without adding this manual line the shape component maxes at 6
+
+
+ *******#HISTOGRAMS*****
   ggplot(mtcars, aes(x = mpg)) +
   geom_histogram(binwidth = 1, fill = "#377EB8", aes(y = ..density..))  #only requires x argument. Can set y to just be a denisty metric. Note that histograms change color with "fill"
 
@@ -298,8 +423,35 @@ ggplot(mtcars, aes(x = cyl, fill = am)) +
   ggplot(mtcars, aes(x = cyl, fill = am)) +
   geom_bar(position = posn_d, alpha = 0.6)  #will show you the overlap via translucent bars
 
+  ggplot(Vocab, aes(x = education, fill = vocabulary)) +
+  geom_bar(position = "fill") +
+  scale_fill_brewer()   #note that standard scale_fill_brewer only has 9 colors so may need to create a manual range:
+  blues <-brewer.pal(9,"Blues") #from the RColorBrewer package
+  blue_range <- colorRampPalette(blues)
+  ggplot(Vocab, aes(x = education, fill = vocabulary)) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values=blue_range(11)) #gets us to the same plot as before but with 11 colors instead of 9
+
   ggplot(mtcars, aes(mpg, col = cyl)) +
   geom_freqpoly(binwidth = 1, position = "identity") #this gives us frequency spikes instead of bars. change the color to "col" since we're not "filling" anything anymore
+
+
+**********LINES**********
+  ggplot(economics, aes(x = date, y = unemploy)) + geom_line()
+
+  ggplot(economics, aes(x = date, y = unemploy/pop)) +
+  geom_rect(data = recess,
+         aes(xmin = begin, xmax = end, ymin = -Inf, ymax = +Inf),   #Call another dataset and tll it to not use the ggplot aes (inherit.aes = FALSE). Shading the plot based on another dataset and definingthe necessary xmin, xmax, ymin, ymax
+         inherit.aes = FALSE, fill = "red", alpha = 0.2) +
+  geom_line()
+
+ggplot(fish.tidy, aes(x = Year, y = Capture, col = Species)) + geom_line() #plotting lines each colored and broken out by species
+
+
+
+
+
+
 
 
 
@@ -365,7 +517,12 @@ legend(x = "topright", legend = paste("Email on File:",levels(custdf$email)),
     +     2,NA,5000, NA,NA,NA,
     +     8,NA,21000,NA,NA,NA,
     +     4,NA,10000,NA,NA,NA), ncol=length(segvars), byrow = TRUE)
-
+# define the double for loop for matrices
+for (i in 1:nrow(ttt)) {
+  for (j in 1:ncol(ttt)) {
+    print(paste("On row", i, "and column", j, "the board contains", ttt[i,j]))
+  }
+}
 
 
 
@@ -528,3 +685,129 @@ dim(dedup) #Check rows, columns
         }
       ***#FUNCTION2***
       ****************
+
+
+
+***************#REGRESSION********************
+library(ggplot2)
+library(corrplot)
+library(dplyr)
+library(readr)
+library (rms)
+library(stats)
+library(MASS)
+# Visualization of correlations
+salesData %>% select_if(is.numeric) %>%
+  select(-id) %>%
+  cor() %>% 
+  corrplot()
+
+#Testing model variables
+vif(object) <- this will give us a sense of what is skewing the model due to multicolienarity. Values above 5 are problematic and 10 are poor predictors
+AIC(object)  #run on the stats package for comparing multiple models vs each other
+stepAIC(object) #run on the MASS package, for automatic model selection
+
+new_outputs <- predict(salesModel2, newdata = salesData2_4) #predict newdata based on a model build
+mean(new_outputs)
+
+
+*********************************************
+*****************#LOGISTIC*******************
+ggplot(defaultData,aes(x = PaymentDefaul)) +
+  geom_histogram(stat = "count")   #plot the binary counts of 0 and 1
+
+glm(response ~ variables, family = binomial, data = df)  #reminder that coefficients of log models are not intuitive, but we can transform to get logodds
+
+logodds: e^coeff signing up for a newsletter increases the odds of returning to the online shop of e^coeff percent
+
+      # Build logistic regression model
+      logitModelFull <- glm(PaymentDefault ~ limitBal + sex + education + marriage +
+                         age + pay1 + pay2 + pay3 + pay4 + pay5 + pay6 + billAmt1 + 
+                         billAmt2 + billAmt3 + billAmt4 + billAmt5 + billAmt6 + payAmt1 + 
+                         payAmt2 + payAmt3 + payAmt4 + payAmt5 + payAmt6, 
+                      family = binomial, data = defaultData)
+
+      # Take a look at the model
+      summary(logitModelFull)
+
+      # Take a look at the odds
+      coefsexp <- coef(logitModelFull) %>% exp() %>% round(2)
+      coefsexp
+
+      #Build from the initial model
+        logitModelNew <- stepAIC(logitModelFull,trace = 0) 
+
+        #Look at the model
+        summary(logitModelNew) 
+
+        # Save the formula of the new model (it will be needed for the out-of-sample part) 
+        formulaLogit <- as.formula(summary(logitModelNew)$call)
+        formulaLogit
+        stepAIC()
+
+        #How to evaluate fit (3 pseudo Rsq stats- McFadden, Cox & Snell, Nagelkerke):
+        library(descr)
+        LogRegR2(object)
+
+        #predict data
+        library(SDMTools)
+        Data$newcolumn <- predict(object, type = "response", na.action = na.exclude )  #na.action excludes missing values
+        data %>% select(returnCustomer, predNew) %>% tail()
+
+        confMatrixNew <- confusion.matrix(churnData$returnCustomer, churnData$predNew, threshold = 0.5) #we set this threshold, 50% makes sense
+        confMatrixNew
+              obs
+        pred  0   1
+         0    A   B     #A is number of unlikely events correctly classified. B and C are misclasifications. D is events occuring correctly classified
+         1    C   D
+
+         MatrixAccuracy <- sum(diag(confMatrixNew)) / sum(confMatrixNew)
+         MatrixAccuracy   #gives us the accuracy of our prediction. Be careful with this number though. we could really high accuracy in "A" with a high N that would skew the accuracy high and overshadow low "D acccuracy"
+
+
+
+#####2
+library(psych)
+library(car)
+library(Hmisc)
+
+
+1.) look at data
+2.) impute (mean or median) OR remove missing values
+3.) Pick a subset of variables you think may be good predictors
+4.) look at data distributions and correctlations (pairs.panesl(object, col = red))
+5.) split data into training and validation subsets (approx 80% trainng 20% validation)
+
+
+
+
+
+library(car) #for vif()
+library(ggplot) #for diagnostic plotting
+library(Rcpp)
+library(psych) #for pairs.panels()
+PrimeIDpct <- read.csv(file.choose(),header=TRUE,stringsAsFactors = TRUE) #load data
+head(PrimeIDpct) #inspect top 6 rows
+summary(PrimeIDpct) #summary data.frame
+str(PrimeIDpct) #look at structure of data
+pairs.panels(PrimeIDpct, col = "red") #look for indications of multicollinearity as well as distributions of the data
+View(PrimeIDpct) #inspect raw data if needed
+subPrimeIDtight <- subset(PrimeIDpct, select = c(Region,Prime_PCT_Sales,TYBasket.,Pct.Mkd,Income.100K.and.150K)) #scale down data based on hypothesis
+pairs.panels(subPrimeIDtight)  #re-check pairs.panels. Two outliers in Pct.Mkd that may be problematic
+lmAllTight <- lm(Prime_PCT_Sales ~ TYBasket. + Pct.Mkd + Income.100K.and.150K + Region, data = subPrimeIDtight, na.action = na.exclude) #multivariable model
+summary(lmAllTight) #summarize model [pvalue, coefficients, fstats, etc.]
+vif(lmAllTight) #check for multicolinearity. Note that under 5 is good, over 10 is worrisome, 5-10 bears consideration
+qqPlot(lmAllTight) #look for independence. want a staight line, not dots outside bounds
+#can stop here if all checks out
+#But, best practice is cross validation, assuming sample size is large enough:
+subPrimeIDtight_noNA <- subPrimeIDtight[complete.cases(subPrimeIDtight),] #remove rows with NA's
+#cross validation begins:
+set.seed(2018)
+training.size <- 0.8
+training.index <- sample.int(length(subPrimeIDtight$Prime_PCT_Sales), round(length(subPrimeIDtight$Prime_PCT_Sales)* training.size))
+training.sample <- subPrimeIDtight[training.index,]
+validate.sample <- subPrimeIDtight[-training.index,]
+Train <- lm(Prime_PCT_Sales ~ TYBasket. + Pct.Mkd + Income.100K.and.150K + Region, data = training.sample, na.action = na.exclude)
+summary(Train)
+Validate <- lm(Prime_PCT_Sales ~ TYBasket. + Pct.Mkd + Income.100K.and.150K + Region, data = validate.sample, na.action = na.exclude)
+summary(Validate)
