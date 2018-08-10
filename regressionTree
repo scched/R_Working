@@ -1,0 +1,45 @@
+####REGRESSION TREE
+install.packages("Metrics") #for MAE/RMSE
+install.packages("rpart") #For regression tree model
+install.packages("caret")  #for grid search
+install.packages("rpart.plot")
+library(Metrics)
+library(rpart)
+library(ggplot2)
+library(caret)
+library(rpart.plot)
+PrimeTree <- read.csv(file.choose(),header=TRUE,stringsAsFactors = TRUE) #filename: PrimeStore_Predict_07172018.csv
+set.seed(1111)
+model1 <- rpart(formula = Prime_PCT_Sales ~.,
+                      data = PrimeTree8918,
+                      method = "anova")  #overall, not split into train/test/validate, yet
+print(model1)
+
+#begin split to training/validate/testing sets
+sets <- sample(1:3, size = nrow(PrimeTree8918), prob = c(.7,.15,.15), replace = TRUE) #assign set variables to subset from
+PrimeTree8918["Sets"] <- sets #append columns
+PT8918_Train <- PrimeTree8918[PrimeTree8918$Sets == 1,]
+PT8918_Valid <- PrimeTree8918[PrimeTree8918$Sets == 2,]
+PT8918_Test <- PrimeTree8918[PrimeTree8918$Sets == 3,]
+PT_Train <- rpart(formula = Prime_PCT_Sales ~.,
+                                   data = PT8918_Train,
+                                   method = "anova")
+predict <- predict(object = PT_Train,
+                     newdata = PT8918_Test)
+rmse(actual = PT8918_Test$Prime_PCT_Sales,
+       predicted = predict)    #.04915284
+mae(actual = PT8918_Test$Prime_PCT_Sales,
+       predicted = predict)  #.03723373
+#prune model by CP
+plotcp(PT_Train)
+print(PT_Train$cptable)
+optcpind <- which.min(PT_Train$cptable[,"xerror"])  #find the row for minimum xerror
+opt_cp <- PT_Train$cptable[optcpind,"CP"] #give us the cp value for the row with the minimum xerror
+PT_Train_Prune <- prune(tree = PT_Train,
+                         cp = opt_cp)  #prune model based on minimum cp value we found
+PredictP <- predict(object = PT_Train_Prune,
+                    newdata = PT8918_Test)
+rmse(actual = PT8918_Test$Prime_PCT_Sales,
+          predicted = PredictP) #.04420387
+mae(actual = PT8918_Test$Prime_PCT_Sales,
+          predicted = PredictP) #0.03559844
