@@ -1075,7 +1075,7 @@ best_model$control  # Print the model paramters of the best model
 
 pred <- predict(object = best_model,
                 newdata = grade_test)  # Compute test set RMSE on best_model
-rmse(actual = grade_test$final_grade, 
+RMSE(actual = grade_test$final_grade, 
      predicted = pred)     
 
 ***************#BAGGING = Bootstrap Aggregating*******************
